@@ -57,3 +57,7 @@ class UserGet(_UserIdentity, _UserInfo, _UserRole, _UserData):
 
     class Config:
         orm_mode = True
+
+class UserGetIdentity(_UserIdentity):
+    class Config:
+        orm_mode = True

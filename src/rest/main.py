@@ -82,8 +82,21 @@ def get_current_user(user: Annotated[User, Depends(verify_user)],
 
 @app.get("/users")
 def get_users(user: Annotated[User, Depends(verify_user)],
-              db: Annotated[Session, Depends(get_db)]) -> List[User]:
+              db: Annotated[Session, Depends(get_db)]) -> List[UserGetIdentity]:
     return crud.get_users(db)
+
+
+@app.get("/users/{username}")
+def get_user(user: Annotated[User, Depends(verify_user)],
+              username: str,
+              db: Annotated[Session, Depends(get_db)]) -> User:
+    db_user = crud.get_user_by_username(db, username)
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    return db_user
 
 
 @app.patch("/users/{username}")
