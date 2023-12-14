@@ -93,9 +93,9 @@ def update_user(user: Annotated[User, Depends(verify_user)],
 
 @app.patch("/users/{user_id}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])
 async def update_user_role(user: Annotated[User, Depends(verify_user)],
+                           user_role_update: UserUpdateRole,
                            db: Annotated[Session, Depends(get_db)]):
-    # Update user role here
-    pass
+    crud.update_user_role(db, user_role_update)
 
 
 @app.post("/users/{username}/projects")

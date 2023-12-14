@@ -37,6 +37,15 @@ def update_user(db: Session, username: str, new_user: rest.schemas.User):
     pass
 
 
+def update_user_role(db: Session, user: rest.schemas.UserUpdateRole):
+    db_user = get_user_by_username(db, user.username)
+    db_user.role = user.role
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
 def get_projects(db: Session, username: str, project_visibility: rest.schemas.ProjectVisibility):
     return db.query(models.Project).filter(and_(models.Project.owner_username == username,
                                                 models.Project.visibility == project_visibility)).all()
