@@ -39,4 +39,4 @@ class TaskGet(_TaskIdentity, _TaskProject, _TaskInfo, _TaskOwner, _TaskTime):
 
 
 class TaskUpdate(_TaskInfo):
-    description: Optional[str]
+    description: Optional[str] = None

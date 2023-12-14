@@ -48,8 +48,8 @@ class UserUpdatePassword(_UserAuth):
 
 
 class UserUpdateInfo(_UserInfo):
-    email: Optional[str]
-    bio: Optional[str]
+    email: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class UserGet(_UserIdentity, _UserInfo, _UserRole, _UserData):
