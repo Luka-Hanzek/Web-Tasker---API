@@ -6,7 +6,7 @@
 
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, status
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
@@ -27,9 +27,11 @@ from utils import password_hasher
 from rest.schemas import *
 
 
-database.models.Base.metadata.create_all(bind=database.db_init.engine)
+description = "APUW lab excercise"
 
-app = FastAPI()
+app = FastAPI(openapi_url='/',
+              description=description)
+prefix_router = APIRouter(prefix='/api')
 
 security = HTTPBasic()
 
@@ -68,25 +70,19 @@ class RoleChecker:
         return user
 
 
-# Custom route for Swagger UI documentation
-@app.get("/")
-def custom_swagger_ui_html():
-    return get_swagger_ui_html(openapi_url="/openapi.json", title="Swagger UI")
-
-
-@app.get("/users/me")
-def get_current_user(user: Annotated[User, Depends(verify_user)],
+@prefix_router.get("/users/me")
+async def get_current_user(user: Annotated[User, Depends(verify_user)],
                      db: Annotated[Session, Depends(get_db)]) -> User:
     return crud.get_user_by_username(db, user.username)
 
 
-@app.get("/users")
+@prefix_router.get("/users")
 def get_users(user: Annotated[User, Depends(verify_user)],
               db: Annotated[Session, Depends(get_db)]) -> List[UserGetIdentity]:
     return crud.get_users(db)
 
 
-@app.get("/users/{username}")
+@prefix_router.get("/users/{username}")
 def get_user(user: Annotated[User, Depends(verify_user)],
               username: str,
               db: Annotated[Session, Depends(get_db)]) -> User:
@@ -99,7 +95,7 @@ def get_user(user: Annotated[User, Depends(verify_user)],
     return db_user
 
 
-@app.patch("/users/{username}")
+@prefix_router.patch("/users/{username}")
 def update_user_info(user: Annotated[User, Depends(verify_user)],
                      username: str,
                      user_info: UserUpdateInfo,
@@ -113,14 +109,14 @@ def update_user_info(user: Annotated[User, Depends(verify_user)],
         )
 
 
-@app.patch("/users/{user_id}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])
+@prefix_router.patch("/users/{user_id}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])
 async def update_user_role(user: Annotated[User, Depends(verify_user)],
                            user_role_update: UserUpdateRole,
                            db: Annotated[Session, Depends(get_db)]):
     crud.update_user_role(db, user.username, user_role_update)
 
 
-@app.post("/users/{username}/projects")
+@prefix_router.post("/users/{username}/projects")
 def create_project(username: str,
                    user: Annotated[User, Depends(verify_user)],
                    project_info: ProjectCreate,
@@ -134,7 +130,7 @@ def create_project(username: str,
     return project
 
 
-@app.get("/users/{username}/projects")
+@prefix_router.get("/users/{username}/projects")
 def get_projects(username: str,
                  user: Annotated[User, Depends(verify_user)],
                  db: Annotated[Session, Depends(get_db)],
@@ -156,7 +152,7 @@ def get_projects(username: str,
     return projects
 
 
-@app.get("/users/{username}/projects/{project_id}")
+@prefix_router.get("/users/{username}/projects/{project_id}")
 def get_project(username: str,
                 project_id: int,
                 user: Annotated[User, Depends(verify_user)],
@@ -179,7 +175,7 @@ def get_project(username: str,
     return project
 
 
-@app.post("/users/{username}/projects/{project_id}/tasks")
+@prefix_router.post("/users/{username}/projects/{project_id}/tasks")
 def create_task(username: str,
                 project_id: int,
                 task: TaskCreate,
@@ -202,7 +198,7 @@ def create_task(username: str,
     crud.create_task(db, user.username, project.id, task)
 
 
-@app.get("/users/{username}/projects/{project_id}/tasks/{task_id}")
+@prefix_router.get("/users/{username}/projects/{project_id}/tasks/{task_id}")
 def get_task(username: str,
              project_id: int,
              task_id: int,
@@ -231,7 +227,7 @@ def get_task(username: str,
     return task
 
 
-@app.get("/users/{username}/projects/{project_id}/tasks")
+@prefix_router.get("/users/{username}/projects/{project_id}/tasks")
 def get_tasks(username: str,
               project_id: int,
               user: Annotated[User, Depends(verify_user)],
@@ -253,7 +249,7 @@ def get_tasks(username: str,
     return crud.get_tasks_by_project_id(db, project_id)
 
 
-@app.patch("/users/{username}/projects/{project_id}/tasks/{task_id}")
+@prefix_router.patch("/users/{username}/projects/{project_id}/tasks/{task_id}")
 def update_task(username: str,
                 project_id: int,
                 task_id: int,
@@ -283,7 +279,7 @@ def update_task(username: str,
     return crud.update_task_info(db, task_id, task_update_info)
 
 
-@app.delete("/users/{username}/projects/{project_id}/tasks")
+@prefix_router.delete("/users/{username}/projects/{project_id}/tasks")
 def delete_task(username: str,
                 project_id: int,
                 task_id: int,
@@ -320,7 +316,7 @@ def delete_task(username: str,
     )
 
 
-@app.post("/users/{username}/projects/{project_id}/tasks/{task_id}/start")
+@prefix_router.post("/users/{username}/projects/{project_id}/tasks/{task_id}/start")
 def start_task(username: str,
                 project_id: int,
                 task_id: int,
@@ -362,7 +358,7 @@ def start_task(username: str,
     )
 
 
-@app.post("/users/{username}/projects/{project_id}/tasks/{task_id}/stop")
+@prefix_router.post("/users/{username}/projects/{project_id}/tasks/{task_id}/stop")
 def stop_task(username: str,
               project_id: int,
               task_id: int,
@@ -407,6 +403,9 @@ def stop_task(username: str,
     raise HTTPException(
         status_code=status.HTTP_200_OK
     )
+
+
+app.include_router(prefix_router)
 
 
 if __name__ == "__main__":
