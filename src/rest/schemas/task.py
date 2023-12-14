@@ -5,13 +5,20 @@ import datetime
 from enum import Enum, auto
 
 
-class Task(BaseModel):
-    id: int
+class _TaskBase(BaseModel):
     description: str
     start_timestamp: Optional[datetime.datetime]
     end_timestamp: Optional[datetime.date]
     project_id: int
     owner_username: str
+
+
+class TaskCreate(_TaskBase):
+    id: int
+
+
+class TaskGet(_TaskBase):
+    id: int
 
     class Config:
         orm_mode = True

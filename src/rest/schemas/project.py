@@ -9,20 +9,20 @@ class ProjectVisibility(Enum):
     PUBLIC = 'public'
 
 
-class ProjectBase(BaseModel):
+class _ProjectBase(BaseModel):
     name: str
-    owner_username: str
     description: str
     visibility: ProjectVisibility
-    task_ids: List[int]
 
 
-class ProjectGet(ProjectBase):
+class ProjectGet(_ProjectBase):
     id: int
+    owner_username: str
+    task_ids: List[int]
 
     class Config:
         orm_mode = True
 
 
-class ProjectCreate(BaseModel):
+class ProjectCreate(_ProjectBase):
     pass

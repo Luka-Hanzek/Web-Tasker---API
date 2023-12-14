@@ -9,18 +9,33 @@ class Role(Enum):
     BASIC = 'basic'
 
 
-class UserBase(BaseModel):
-    username: str
+class _UserBase(BaseModel):
     email: str
     age: int
     role: Role
 
 
-class UserCreate(UserBase):
+class User(_UserBase):
+    username: int
+
+
+class UserCreate(_UserBase):
+    username: str
     password: str
 
 
-class User(UserBase):
+class UserUpdateRole(BaseModel):
+    username: str
+    role: Role
+
+
+class UserUpdatePassword(BaseModel):
+    username: str
+    password: str
+
+
+class UserGet(_UserBase):
+    username: str
     project_ids: List[int]
 
     class Config:
