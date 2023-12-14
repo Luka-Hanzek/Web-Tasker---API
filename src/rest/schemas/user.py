@@ -5,8 +5,8 @@ from enum import Enum
 
 
 class Role(Enum):
-    ADMIN = 1
-    BASIC = 2
+    ADMIN = 'admin'
+    BASIC = 'basic'
 
 
 class UserBase(BaseModel):
