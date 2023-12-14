@@ -71,6 +71,13 @@ def get_project_by_id(db: Session, project_id: int):
     return db.query(models.Project).filter(models.Project.id == project_id).first()
 
 
+def get_project_by_id_and_owner_username(db: Session, project_id: int, username: str):
+    conditions = [
+        models.Project.id == project_id,
+        models.Project.owner_username == username
+    ]
+    return db.query(models.Project).filter(and_(*conditions)).first()
+
 def create_project(db: Session, username: str, project: rest.schemas.ProjectCreate):
     db_project = models.Project(name=project.name,
                                 description=project.description,

@@ -162,7 +162,7 @@ def get_project(username: str,
                 user: Annotated[User, Depends(verify_user)],
                 db: Annotated[Session, Depends(get_db)],
                 visibility: Optional[ProjectVisibility] = None):
-    project = crud.get_project_by_id(db, project_id)
+    project = crud.get_project_by_id_and_owner_username(db, project_id, username)
     if project is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
