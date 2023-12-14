@@ -37,7 +37,7 @@ def create_user(db: Session, user: rest.schemas.UserCreate):
 
 
 def update_user_info(db: Session, username: str, user_info: rest.schemas.UserUpdateInfo):
-    db_user = get_user_by_username(username)
+    db_user = get_user_by_username(db, username)
     if user_info.email is not None:
         db_user.email = user_info.email
     if user_info.bio is not None:

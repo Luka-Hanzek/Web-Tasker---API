@@ -103,7 +103,7 @@ def get_user(user: Annotated[User, Depends(verify_user)],
 def update_user_info(user: Annotated[User, Depends(verify_user)],
                      username: str,
                      user_info: UserUpdateInfo,
-                     db: Annotated[Session, Depends(get_db)]):
+                     db: Annotated[Session, Depends(get_db)]) -> UserGet:
     if username == user.username or user.role == Role.ADMIN:
         return crud.update_user_info(db, user.username, user_info)
     else:
