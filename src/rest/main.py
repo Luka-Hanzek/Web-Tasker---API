@@ -88,9 +88,19 @@ def get_users(user: Annotated[User, Depends(verify_user)],
 
 
 @app.patch("/users/{username}")
-def update_user(user: Annotated[User, Depends(verify_user)],
-                db: Annotated[Session, Depends(get_db)]):
-    pass
+def update_user_info(user: Annotated[User, Depends(verify_user)],
+                     username: str,
+                     user_info: UserUpdateInfo,
+                     db: Annotated[Session, Depends(get_db)]):
+    if username == user.username or user.role == Role.ADMIN:
+        return crud.update_user_info(db, user.username, user_info)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
 
 
 @app.patch("/users/{user_id}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])

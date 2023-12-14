@@ -33,8 +33,17 @@ def create_user(db: Session, user: rest.schemas.UserCreate):
     return db_user
 
 
-def update_user(db: Session, username: str, new_user: rest.schemas.User):
-    pass
+def update_user_info(db: Session, username: str, user_info: rest.schemas.UserUpdateInfo):
+    db_user = get_user_by_username(username)
+    if user_info.email is not None:
+        db_user.email = user_info.email
+    if user_info.bio is not None:
+        db_user.bio = user_info.bio
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 
 def update_user_role(db: Session, username: str, user: rest.schemas.UserUpdateRole):
