@@ -59,4 +59,4 @@ def create_project(db: Session, username: str, project: rest.schemas.ProjectCrea
     db.add(db_project)
     db.commit()
     db.refresh(db_project)
-    return db_project.id
+    return db_project

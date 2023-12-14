@@ -109,8 +109,8 @@ def create_project(username: str,
             detail="Unauthorized",
             headers={"WWW-Authenticate": "Basic"},
         )
-    id = crud.create_project(db, user.username, project_info)
-    return dict(id=id)
+    project = crud.create_project(db, user.username, project_info)
+    return project
 
 
 @app.get("/users/{username}/projects")
