@@ -54,10 +54,12 @@ def verify_user(credentials: Annotated[HTTPBasicCredentials, Depends(security)],
 
 
 class RoleChecker:
-    def __init__(self, role: str):
+    def __init__(self, role: Role):
         self.role = role
 
-    def __call__(self, user: User = Depends(verify_user)):
+    def __call__(self, db: Annotated[Session, Depends(get_db)],
+                 credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+        user = crud.get_user_by_username(db, credentials.username)
         if user.role != self.role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
