@@ -63,8 +63,7 @@ class RoleChecker:
         if user.role != self.role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Unauthorized",
-                headers={"WWW-Authenticate": "Basic"},
+                detail="Unauthorized"
             )
         return user
 
@@ -97,8 +96,7 @@ def update_user_info(user: Annotated[User, Depends(verify_user)],
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Basic"},
+            detail="Unauthorized"
         )
 
 
@@ -118,8 +116,7 @@ def create_project(username: str,
     if username != user.username:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Basic"},
+            detail="Unauthorized"
         )
     project = crud.create_project(db, user.username, project_info)
     return project
@@ -135,8 +132,7 @@ def get_projects(username: str,
         if username != user.username and user.role != Role.ADMIN:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Unauthorized",
-                headers={"WWW-Authenticate": "Basic"},
+                detail="Unauthorized"
             )
         projects.extend(crud.get_projects(db, username, ProjectVisibility.PRIVATE))
     if visibility == ProjectVisibility.PUBLIC or visibility is None:
