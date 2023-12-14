@@ -1,12 +1,14 @@
 from sqlalchemy.orm import Session
-
 from sqlalchemy import and_
+
+from typing import Optional
+
 from . import models
 import rest.schemas
 from utils import password_hasher
 
 
-def get_user_by_username(db: Session, username: int):
+def get_user_by_username(db: Session, username: str) -> Optional[models.User]:
     return db.query(models.User).filter(models.User.username == username).first()
 
 
@@ -31,7 +33,7 @@ def create_user(db: Session, user: rest.schemas.UserCreate):
     return db_user
 
 
-def update_user(db: Session, user: rest.schemas.UserCreate):
+def update_user(db: Session, username: str, new_user: rest.schemas.User):
     pass
 
 
