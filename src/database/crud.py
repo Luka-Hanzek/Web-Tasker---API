@@ -73,3 +73,13 @@ def create_project(db: Session, username: str, project: rest.schemas.ProjectCrea
     db.commit()
     db.refresh(db_project)
     return db_project
+
+
+def create_task(db: Session, username: str, project_id: int, task: rest.schemas.TaskCreate):
+    task_db = models.Task(description=task.description,
+                          owner_username=username,
+                          project_id=project_id)
+    db.add(task_db)
+    db.commit()
+    db.refresh(task_db)
+    return task_db

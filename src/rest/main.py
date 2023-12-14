@@ -145,10 +145,21 @@ def get_projects(username: str,
 @app.post("/users/{username}/projects/{project_id}/tasks")
 def create_task(username: str,
                 project_id: int,
+                task: TaskCreate,
                 user: Annotated[User, Depends(verify_user)],
                 db: Annotated[Session, Depends(get_db)]):
-    pass
-
+    if username != user.username:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized"
+        )
+    my_project_ids = [project.id for project in crud.get_projects(db, user.username)]
+    if project_id not in my_project_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    return crud.create_task(db, user.username, project_id, task)
 
 @app.get("/users/{username}/projects/{project_id}/tasks/{task_id}")
 def get_task(username: str,
