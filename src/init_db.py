@@ -84,7 +84,23 @@ tasks = {
                          f'project name: {user_projects_models["username01"][0].name}\n\n'
                          'Do this do that'),
         dict(description=f'owner: username01\n'
-                         f'project name: {user_projects_models["username01"][1].name}\n\n'
+                         f'project name: {user_projects_models["username01"][0].name}\n\n'
+                         'Do this do that')
+    ],
+    ('username02', user_projects_models['username02'][0].id): [
+        dict(description=f'owner: username02\n'
+                         f'project name: {user_projects_models["username02"][0].name}\n\n'
+                         'Do this do that'),
+        dict(description=f'owner: username02\n'
+                         f'project name: {user_projects_models["username02"][0].name}\n\n'
+                         'Do this do that')
+    ],
+    ('username02', user_projects_models['username02'][1].id): [
+        dict(description=f'owner: username02\n'
+                         f'project name: {user_projects_models["username02"][1].name}\n\n'
+                         'Do this do that'),
+        dict(description=f'owner: username02\n'
+                         f'project name: {user_projects_models["username02"][1].name}\n\n'
                          'Do this do that')
     ]
 }
