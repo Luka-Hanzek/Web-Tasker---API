@@ -100,7 +100,6 @@ def update_user_info(user: Annotated[User, Depends(verify_user)],
         )
 
 
-
 @app.patch("/users/{user_id}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])
 async def update_user_role(user: Annotated[User, Depends(verify_user)],
                            user_role_update: UserUpdateRole,
@@ -135,11 +134,34 @@ def get_projects(username: str,
                 detail="Unauthorized"
             )
         projects.extend(crud.get_projects(db, username, ProjectVisibility.PRIVATE))
-    if visibility == ProjectVisibility.PUBLIC or visibility is None:
+    elif visibility == ProjectVisibility.PUBLIC:
+        projects.extend(crud.get_projects(db, username, ProjectVisibility.PUBLIC))
+    elif visibility is None:
         if user.username == username or user.role == Role.ADMIN:
-            projects.extend(crud.get_projects(db, username, ProjectVisibility.PRIVATE))
+            projects.extend(crud.get_projects(db, username))
         projects.extend(crud.get_projects(db, username, ProjectVisibility.PUBLIC))
     return projects
+
+
+@app.get("/users/{username}/projects/{project_id}")
+def get_project(username: str,
+                project_id: int,
+                user: Annotated[User, Depends(verify_user)],
+                db: Annotated[Session, Depends(get_db)],
+                visibility: Optional[ProjectVisibility] = None):
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    return project
 
 
 @app.post("/users/{username}/projects/{project_id}/tasks")
@@ -148,18 +170,20 @@ def create_task(username: str,
                 task: TaskCreate,
                 user: Annotated[User, Depends(verify_user)],
                 db: Annotated[Session, Depends(get_db)]):
-    if username != user.username:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized"
-        )
-    my_project_ids = [project.id for project in crud.get_projects(db, user.username)]
-    if project_id not in my_project_ids:
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found",
         )
-    return crud.create_task(db, user.username, project_id, task)
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    crud.create_task(db, user.username, project.id, task)
+
 
 @app.get("/users/{username}/projects/{project_id}/tasks/{task_id}")
 def get_task(username: str,
@@ -167,16 +191,73 @@ def get_task(username: str,
              task_id: int,
              user: Annotated[User, Depends(verify_user)],
              db: Annotated[Session, Depends(get_db)]):
-    pass
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    task = crud.get_task_by_id(db, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    return task
+
+
+@app.get("/users/{username}/projects/{project_id}/tasks")
+def get_tasks(username: str,
+              project_id: int,
+              user: Annotated[User, Depends(verify_user)],
+              db: Annotated[Session, Depends(get_db)]):
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    return crud.get_tasks_by_project_id(db, project_id)
 
 
 @app.patch("/users/{username}/projects/{project_id}/tasks/{task_id}")
 def update_task(username: str,
                 project_id: int,
                 task_id: int,
+                task_update_info: TaskUpdate,
                 user: Annotated[User, Depends(verify_user)],
                 db: Annotated[Session, Depends(get_db)]):
-    pass
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    task = crud.get_task_by_id(db, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    return crud.update_task_info(db, task_id, task_update_info)
 
 
 @app.delete("/users/{username}/projects/{project_id}/tasks")
@@ -185,7 +266,33 @@ def delete_task(username: str,
                 task_id: int,
                 user: Annotated[User, Depends(verify_user)],
                 db: Annotated[Session, Depends(get_db)]):
-    pass
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    task = crud.get_task_by_id(db, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    sucess = crud.delete_task(db, task_id)
+    if not sucess:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Task could not be deleted"
+        )
+    raise HTTPException(
+        status_code=status.HTTP_200_OK
+    )
 
 
 @app.post("/users/{username}/projects/{project_id}/tasks/{task_id}/start")
@@ -194,7 +301,38 @@ def start_task(username: str,
                 task_id: int,
                 user: Annotated[User, Depends(verify_user)],
                 db: Annotated[Session, Depends(get_db)]):
-    pass
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    task = crud.get_task_by_id(db, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    if task.start_timestamp is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Task already started"
+        )
+    sucess = crud.start_task(db, task_id)
+    if not sucess:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Task could not be started"
+        )
+    raise HTTPException(
+        status_code=status.HTTP_200_OK
+    )
 
 
 @app.post("/users/{username}/projects/{project_id}/tasks/{task_id}/stop")
@@ -203,7 +341,43 @@ def stop_task(username: str,
               task_id: int,
               user: Annotated[User, Depends(verify_user)],
               db: Annotated[Session, Depends(get_db)]):
-    pass
+    project = crud.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+    # We raise 404 to not revel whether private projects exists or not
+    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found"
+        )
+    task = crud.get_task_by_id(db, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+    if task.start_timestamp is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot stop task that wasn't started"
+        )
+    if task.end_timestamp is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Task already stopped"
+        )
+    sucess = crud.stop_task(db, task_id)
+    if not sucess:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Task could not be stopped"
+        )
+    raise HTTPException(
+        status_code=status.HTTP_200_OK
+    )
 
 
 if __name__ == "__main__":
