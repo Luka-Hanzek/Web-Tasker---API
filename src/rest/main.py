@@ -97,7 +97,7 @@ def update_user(user: Annotated[User, Depends(verify_user)],
 async def update_user_role(user: Annotated[User, Depends(verify_user)],
                            user_role_update: UserUpdateRole,
                            db: Annotated[Session, Depends(get_db)]):
-    crud.update_user_role(db, user_role_update)
+    crud.update_user_role(db, user.username, user_role_update)
 
 
 @app.post("/users/{username}/projects")

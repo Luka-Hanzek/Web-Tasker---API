@@ -37,8 +37,8 @@ def update_user(db: Session, username: str, new_user: rest.schemas.User):
     pass
 
 
-def update_user_role(db: Session, user: rest.schemas.UserUpdateRole):
-    db_user = get_user_by_username(db, user.username)
+def update_user_role(db: Session, username: str, user: rest.schemas.UserUpdateRole):
+    db_user = get_user_by_username(db, username)
     db_user.role = user.role
     db.add(db_user)
     db.commit()
