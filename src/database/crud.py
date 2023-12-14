@@ -24,7 +24,7 @@ def create_user(db: Session, user: rest.schemas.UserCreate):
     hashed_password = password_hasher.hash_password(user.password)
     db_user = models.User(username=user.username,
                           email=user.email,
-                          age=user.age,
+                          bio=user.bio,
                           role=user.role,
                           hashed_password=hashed_password)
     db.add(db_user)
