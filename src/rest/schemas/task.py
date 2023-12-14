@@ -36,3 +36,7 @@ class TaskCreate(_TaskInfo):
 class TaskGet(_TaskIdentity, _TaskProject, _TaskInfo, _TaskOwner, _TaskTime):
     class Config:
         orm_mode = True
+
+
+class TaskUpdate(_TaskInfo):
+    description: Optional[str]
