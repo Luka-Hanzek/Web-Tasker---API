@@ -10,7 +10,7 @@ class User(Base):
 
     username = Column(String, primary_key=True)
     email = Column(String, unique=True)
-    age = Column(Integer, nullable=False)
+    bio = Column(String, nullable=False)
     hashed_password = Column(String)
     role = Column(Enum(user.Role), nullable=False)
 
