@@ -169,7 +169,9 @@ def get_project(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -190,7 +192,9 @@ def create_task(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -211,7 +215,9 @@ def get_task(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -237,7 +243,9 @@ def get_tasks(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -259,7 +267,9 @@ def update_task(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -286,7 +296,9 @@ def delete_task(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -321,7 +333,9 @@ def start_task(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
@@ -361,7 +375,9 @@ def stop_task(username: str,
             detail="Project not found",
         )
     # We raise 404 to not revel whether private projects exists or not
-    if username != user.username and project.visibility == ProjectVisibility.PRIVATE:
+    if (user.role != Role.ADMIN and
+            username != user.username and
+            project.visibility == ProjectVisibility.PRIVATE):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
