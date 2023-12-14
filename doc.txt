@@ -1,0 +1,54 @@
+Time tracking service
+
+Features:
+    1. Users can access their information:
+        GET    "/users/<username>" - users can access their (or others' info)
+        UPDATE "/users/<username>" - users can update their user info
+            - only authenticated user can edit the data
+
+    2. Users can acess other users:
+        GET    "/users" - users can access list of all users on the platform
+
+    3. Support for projects:
+        PUT     "/<username>/projects/<project_name>" - creating new project with data
+            - only authenticated user with <username> can create project under this url
+        POST    "/<username>/projects" - create new empty project
+            - only authenticated user with <username> can create project under this url
+        GET     "/<username>/projects" - accessing all projects of the user
+            - only authenticated user with <username> can get projects
+        GET     "/<username>/projects/<project_name>" - accessing project info
+            - only authenticated user with <username> can get project info
+        GET     "/<username>/public_projects" - accessing list of public projects of the user
+            - any user can acess this info (there projects are public afterall)
+        GET     "/<username>/public_projects/<project_name>" - accessing public project info of the
+                                                               user
+            - any user can acess this info (there projects are public after-all)
+        UPDATE  "/<username>/projects/<project_name>" - update the project
+            - only logged in user with <username> can edit this info. The user can edit project
+                info like name and such. The user can also make the project private or public
+                which makes it appear under "/<username>/public_projects/<project_name>"
+        DELETE  "/<username>/projects/<project_name>" - delete the project
+            - only user that created the project can delete it. DELETE on
+                "/<username>/public_projects/<project_name>" is never allowed though.
+
+    4. Support for project tasks:
+        PUT     "/<username>/projects/<project_name>/<task_name>" - creating new project task with
+                                                                    data
+            - only authenticated user can create tasks
+        PUT     "/<username>/public_projects/<project_name>/<task_name>" - creating new project task
+                                                                           with data
+            - any user can create tasks here since this is a public project
+
+        POST    "/<username>/projects/<project_name>/<task_name>" - users can start and stop the
+                                                                    task
+            - only authenticated user with <username> can start/stop tasks
+        POST    "/<username>/public_projects/<project_name>/<task_name>" - users can start and stop
+                                                                           the task
+            - all users can start/stop the task since this is public project
+        DELETE  "/<username>/projects/<project_name>/<task_name>" - delete the task
+            - only user that owns the project can delete it.
+        DELETE  "/<username>/public_projects/<project_name>/<task_name>" - delete the task of a
+                                                                           public project
+            - only user that created the task can delete it.
+
+    NOTE: User "admin" has no restrictions.
