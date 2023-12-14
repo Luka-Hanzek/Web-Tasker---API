@@ -1,8 +1,13 @@
 from database import db_init
 from rest import schemas
 from database import crud
+from database import models
+
+from collections import defaultdict
+from typing import List, Dict, Tuple
 
 import os
+
 
 database_path = db_init.get_db_path()
 if os.path.exists(database_path):
@@ -64,9 +69,29 @@ projects = dict(
     ]
 )
 
+user_projects_models: Dict[str, List[models.Project]] = defaultdict(list)
+
 for username, user_projects in projects.items():
-    for user_project in user_projects:
-        create_project_schema = schemas.ProjectCreate(**user_project)
-        crud.create_project(session, username, create_project_schema)
+    for project in user_projects:
+        create_project_schema = schemas.ProjectCreate(**project)
+        project = crud.create_project(session, username, create_project_schema)
+        user_projects_models[username].append(project)
+
+
+tasks = {
+    ('username01', user_projects_models['username01'][0].id): [
+        dict(description=f'owner: username01\n'
+                         f'project name: {user_projects_models["username01"][0].name}\n\n'
+                         'Do this do that'),
+        dict(description=f'owner: username01\n'
+                         f'project name: {user_projects_models["username01"][1].name}\n\n'
+                         'Do this do that')
+    ]
+}
+
+for (username, project_id), user_tasks in tasks.items():
+    for user_task in user_tasks:
+        create_task_schema = schemas.TaskCreate(**user_task)
+        project = crud.create_task(session, username, project_id, create_project_schema)
 
 session.close()
