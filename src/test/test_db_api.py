@@ -1,17 +1,7 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from database.db_init import Base
 from rest.schemas import (UserCreate, UserUpdateInfo, UserUpdateRole, ProjectCreate,
                           TaskCreate, Role, ProjectVisibility)
 
 from database import crud
-
-
-DATABASE_URL = "sqlite:///:memory:"
-engine = create_engine(DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
 
 
 def test_create_user(db_session):
