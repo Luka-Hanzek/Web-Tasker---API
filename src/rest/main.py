@@ -71,7 +71,7 @@ class RoleChecker:
 
 
 @prefix_router.get("/users/me")
-async def get_current_user(user: Annotated[User, Depends(verify_user)],
+def get_current_user(user: Annotated[User, Depends(verify_user)],
                      db: Annotated[Session, Depends(get_db)]) -> User:
     return crud.get_user_by_username(db, user.username)
 
@@ -109,11 +109,12 @@ def update_user_info(user: Annotated[User, Depends(verify_user)],
         )
 
 
-@prefix_router.patch("/users/{user_id}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])
-async def update_user_role(user: Annotated[User, Depends(verify_user)],
-                           user_role_update: UserUpdateRole,
-                           db: Annotated[Session, Depends(get_db)]):
-    crud.update_user_role(db, user.username, user_role_update)
+@prefix_router.patch("/users/{username}/role", dependencies=[Depends(RoleChecker(Role.ADMIN))])
+def update_user_role(user: Annotated[User, Depends(verify_user)],
+                     user_role_update: UserUpdateRole,
+                     username: str,
+                     db: Annotated[Session, Depends(get_db)]):
+    crud.update_user_role(db, username, user_role_update)
 
 
 @prefix_router.post("/users/{username}/projects")
@@ -134,7 +135,7 @@ def create_project(username: str,
 def get_projects(username: str,
                  user: Annotated[User, Depends(verify_user)],
                  db: Annotated[Session, Depends(get_db)],
-                 visibility: Optional[ProjectVisibility] = None):
+                 visibility: Optional[ProjectVisibility] = None) -> List[ProjectGet]:
     projects = []
     if visibility == ProjectVisibility.PRIVATE:
         if username != user.username and user.role != Role.ADMIN:
@@ -195,7 +196,7 @@ def create_task(username: str,
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Project not found"
         )
-    crud.create_task(db, user.username, project.id, task)
+    return crud.create_task(db, user.username, project.id, task)
 
 
 @prefix_router.get("/users/{username}/projects/{project_id}/tasks/{task_id}")
@@ -279,7 +280,7 @@ def update_task(username: str,
     return crud.update_task_info(db, task_id, task_update_info)
 
 
-@prefix_router.delete("/users/{username}/projects/{project_id}/tasks")
+@prefix_router.delete("/users/{username}/projects/{project_id}/tasks/{task_id}")
 def delete_task(username: str,
                 project_id: int,
                 task_id: int,

@@ -7,7 +7,14 @@ from sqlalchemy.orm import Session
 from collections import defaultdict
 from typing import List, Dict
 
+
 user_projects_models: Dict[str, List[models.Project]] = defaultdict(list)
+
+admin = dict(username='admin',
+             email='admin@gmail.com',
+             bio='admin bio',
+             role=schemas.Role.ADMIN,
+             password='admin')
 
 users = [
     dict(username='username01',
@@ -20,11 +27,7 @@ users = [
          bio='username02 bio',
          role=schemas.Role.BASIC,
          password='username02_password'),
-    dict(username='admin',
-         email='admin@gmail.com',
-         bio='admin bio',
-         role=schemas.Role.ADMIN,
-         password='admin')
+    admin
 ]
 
 
@@ -57,28 +60,28 @@ projects = dict(
 
 
 tasks = {
-    ('username01', user_projects_models['username01'][0].id): [
+    ('username01', 'username01_project01'): [
         dict(description=f'owner: username01\n'
-                         f'project name: {user_projects_models["username01"][0].name}\n\n'
+                         f'project name: username01_project01\n\n'
                          'Do this do that'),
         dict(description=f'owner: username01\n'
-                         f'project name: {user_projects_models["username01"][0].name}\n\n'
+                         f'project name: username01_project01\n\n'
                          'Do this do that')
     ],
-    ('username02', user_projects_models['username02'][0].id): [
+    ('username02', 'username02_project01'): [
         dict(description=f'owner: username02\n'
-                         f'project name: {user_projects_models["username02"][0].name}\n\n'
+                         f'project name: username02_project01\n\n'
                          'Do this do that'),
         dict(description=f'owner: username02\n'
-                         f'project name: {user_projects_models["username02"][0].name}\n\n'
+                         f'project name: username02_project01\n\n'
                          'Do this do that')
     ],
-    ('username02', user_projects_models['username02'][1].id): [
+    ('username02', 'username02_project02'): [
         dict(description=f'owner: username02\n'
-                         f'project name: {user_projects_models["username02"][1].name}\n\n'
+                         f'project name: username02_project02\n\n'
                          'Do this do that'),
         dict(description=f'owner: username02\n'
-                         f'project name: {user_projects_models["username02"][1].name}\n\n'
+                         f'project name: username02_project02\n\n'
                          'Do this do that')
     ]
 }
@@ -95,7 +98,8 @@ def run(db: Session):
             project = crud.create_project(db, username, create_project_schema)
             user_projects_models[username].append(project)
 
-    for (username, project_id), user_tasks in tasks.items():
+    for (username, project_name), user_tasks in tasks.items():
         for user_task in user_tasks:
+            project = crud.get_projects_by_owner_username_and_name(db, username, project_name)[0]
             create_task_schema = schemas.TaskCreate(**user_task)
-            crud.create_task(db, username, project_id, create_task_schema)
+            crud.create_task(db, username, project.id, create_task_schema)
